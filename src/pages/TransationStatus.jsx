@@ -27,6 +27,16 @@ export default function FinalPage() {
     return () => dispatch(resetTransactionState());
   }, [dispatch, transactionId, navigate]);
 
+  // REDIRECCIÓN AUTOMÁTICA DESPUÉS DE 5 SEGUNDOS
+  useEffect(() => {
+    if (transaction) {
+      const timer = setTimeout(() => {
+        navigate("/"); // vuelve a la página principal
+      }, 7000);
+      return () => clearTimeout(timer); // limpiar timer si se desmonta antes
+    }
+  }, [transaction, navigate]);
+
   if (loading) return <p>Cargando resultado de pago...</p>;
   if (error)
     return (
@@ -51,22 +61,44 @@ export default function FinalPage() {
         <strong>Cantidad:</strong> {transaction.quantity}
       </p>
       <p>
-        <strong>Total:</strong> ${transaction.quantity * transaction.product?.price}
+        <strong>Total:</strong> $
+        {transaction.quantity * transaction.product?.price}
       </p>
 
       <h2>Cliente</h2>
-      <p>{transaction.customer?.name}</p>
-      <p>{transaction.customer?.email}</p>
+      <p>
+        <strong>Nombre:</strong> {transaction.customer?.name}
+      </p>
+      <p>
+        <strong>Email:</strong> {transaction.customer?.email}
+      </p>
 
       {isSuccess && (
         <>
           <h2>Delivery</h2>
-          <p>{transaction.delivery?.address}</p>
-          <p>{transaction.customer?.city}</p>
-          <p>{transaction.delivery?.status}</p>
-          <p>{transaction.delivery?.estimatedDelivery}</p>
+          <p>
+            <strong>Dirección:</strong> {transaction.delivery?.address}
+          </p>
+          <p>
+            <strong>Ciudad:</strong> {transaction.customer?.city}
+          </p>
+          <p>
+            <strong>Estado:</strong> {transaction.delivery?.status}
+          </p>
+          <p>
+            <strong>Entrega estimada:</strong>{" "}
+            {new Date(transaction.delivery?.estimatedDelivery).toLocaleDateString("es-CO", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+          </p>
         </>
       )}
+
+      <p style={{ marginTop: "1rem", fontStyle: "italic" }}>
+        Redirigiendo a la página principal en 7 segundos...
+      </p>
     </div>
   );
 }

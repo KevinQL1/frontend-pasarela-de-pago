@@ -12,12 +12,37 @@ export const paymentSchema = yup.object().shape({
   expiry: yup
     .string()
     .required("Expiry es requerido")
+    // Transformación automática: pone / después de dos dígitos
+    .transform((value) => {
+      if (!value) return value;
+      const cleaned = value.replace(/\D/g, "").slice(0, 4); // solo números, máximo 4 dígitos
+      if (cleaned.length > 2) {
+        return cleaned.slice(0, 2) + "/" + cleaned.slice(2);
+      }
+      return cleaned;
+    })
     .matches(/^\d{2}\/\d{2}$/, "Expiry debe tener formato MM/YY")
-    .test("expiry-valid", "Mes/Año inválido", (value) => {
-      if (!value) return false;
-      const [month, year] = value.split("/").map(Number);
-      return month >= 1 && month <= 12 && year >= 26 && year <= 50;
-    }),
+    .test(
+      "expiry-valid",
+      "Mes/Año inválido o tarjeta vencida",
+      (value) => {
+        if (!value) return false;
+        const [month, year] = value.split("/").map(Number);
+
+        // Mes válido
+        if (month < 1 || month > 12) return false;
+
+        // Validación de tarjeta vencida
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // enero=0
+        const currentYear = today.getFullYear() % 100; // últimos 2 dígitos del año
+
+        if (year < currentYear) return false; // año pasado
+        if (year === currentYear && month < currentMonth) return false; // mes pasado en el año actual
+
+        return true;
+      }
+    ),
   cvc: yup
     .string()
     .required("CVC es requerido")

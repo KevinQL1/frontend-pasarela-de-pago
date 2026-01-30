@@ -17,17 +17,34 @@ export default function ProductPage() {
   if (loading) return <p>Cargando productos...</p>;
   if (error) return <p>Error: {error}</p>;
 
+  // Muestra productos con stock > 0
   const availableProducts = products.filter((p) => p.stock > 0);
 
+  // Manejador de cambios en el input
   const handleQuantityChange = (productId, value, max) => {
-    let qty = parseInt(value) || 1;
-    if (qty < 1) qty = 1;
+    // Permite campo vacío temporal
+    if (value === "") {
+      setQuantities({ ...quantities, [productId]: "" });
+      return;
+    }
+
+    // Solo números del 0 al 9
+    const cleanedValue = value.replace(/[^0-9]/g, "");
+
+    let qty = parseInt(cleanedValue);
+    if (isNaN(qty) || qty < 1) qty = 1;
     if (qty > max) qty = max;
+
     setQuantities({ ...quantities, [productId]: qty });
   };
 
+  // Compra del producto
   const handleBuy = (product) => {
-    const quantity = quantities[product.id] || 1;
+    let quantity = quantities[product.id];
+
+    // El input está vacío o inválido, pone 1
+    if (!quantity || quantity < 1) quantity = 1;
+
     navigate("/payment", { state: { product, quantity } });
   };
 
@@ -55,12 +72,14 @@ export default function ProductPage() {
           </p>
 
           <label>
-            Quantity:{" "}
+            Cantidad:{" "}
             <input
-              type="number"
-              min={1}
-              max={product.stock}
-              value={quantities[product.id] || 1}
+              type="text"
+              value={
+                quantities[product.id] === ""
+                  ? ""
+                  : quantities[product.id] || 1
+              }
               onChange={(e) =>
                 handleQuantityChange(product.id, e.target.value, product.stock)
               }

@@ -3,6 +3,7 @@ import ProductPage from "#/pages/ProductPage.jsx";
 import PaymentPage from "#/pages/PaymentPage.jsx";
 import SummaryPage from "#/pages/SummaryPage.jsx";
 import TransationStatus from "#/pages/TransationStatus.jsx";
+import '#/styles/global.css';
 
 /**
  * Componente raíz de la aplicación
