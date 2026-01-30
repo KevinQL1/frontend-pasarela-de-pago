@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import productReducer from '#/features/product/productSlice.js';
+import paymentReducer from '#/features/payment/paymentSlice.js';
 
 /**
  * Store global de Redux
@@ -9,6 +10,8 @@ import productReducer from '#/features/product/productSlice.js';
 export const store = configureStore({
   reducer: {
     // Estado product -> productSlice
-    product: productReducer
-  }
+    product: productReducer,
+    // Estado payment -> paymentSlice
+    payment: paymentReducer,
+  },
 });

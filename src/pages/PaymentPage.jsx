@@ -3,10 +3,15 @@ import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { paymentSchema } from "#/schemas/paymentSchema.js";
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { processPayment, resetPaymentState } from "#/features/payment/paymentSlice.js";
 
 export default function PaymentPage() {
   const location = useLocation();
   const { product, quantity } = location.state || {};
+
+  const dispatch = useDispatch();
+  const { loading, success, error } = useSelector(state => state.payment || {});
 
   const {
     register,
@@ -32,19 +37,34 @@ export default function PaymentPage() {
 
   useEffect(() => {
     if (!cardNumber) return;
-
     if (cardNumber.startsWith("4")) setValue("cardType", "VISA");
     else if (cardNumber.startsWith("5")) setValue("cardType", "MASTERCARD");
   }, [cardNumber, setValue]);
 
   const onSubmit = (data) => {
-    console.log("Payment info:", data);
-    alert("Datos enviados correctamente 💳");
+    // ✅ Armamos el body que espera la API
+    const body = {
+      paymentInfo: {
+        cardNumber: data.cardNumber,
+        cardType: data.cardType,
+        expiry: data.expiry,
+        cvc: data.cvc,
+        customer: data.customer,
+        productId: data.productId,
+        quantity: data.quantity,
+      },
+    };
+
+    dispatch(processPayment(body));
   };
+
+  // Resetear estado al desmontar
+  useEffect(() => {
+    return () => dispatch(resetPaymentState());
+  }, [dispatch]);
 
   if (!product) return <p>No hay producto seleccionado</p>;
 
-  // Mapeo de labels en español para los campos del cliente
   const customerLabels = {
     cedula: "Cédula",
     name: "Nombre completo",
@@ -57,19 +77,24 @@ export default function PaymentPage() {
   return (
     <div style={{ padding: "1rem" }}>
       <h1>Pagar: {product.name}</h1>
+
+      {loading && <p>Cargando...</p>}
+      {success && <p style={{ color: "green" }}>Pago realizado con éxito 💳</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <input type="hidden" {...register("productId")} />
         <input type="hidden" {...register("quantity")} />
 
         <h2>Información de la tarjeta</h2>
         <div>
-          <label>Número de la Tarjeta: </label>
+          <label>Número de la Tarjeta:</label>
           <input {...register("cardNumber")} />
           <p style={{ color: "red" }}>{errors.cardNumber?.message}</p>
         </div>
 
         <div>
-          <label>Tipo de Tarjeta: </label>
+          <label>Tipo de Tarjeta:</label>
           <select {...register("cardType")}>
             <option value="VISA">VISA</option>
             <option value="MASTERCARD">MASTERCARD</option>
@@ -78,13 +103,13 @@ export default function PaymentPage() {
         </div>
 
         <div>
-          <label>Expira en (MM/YY): </label>
+          <label>Expira en (MM/YY):</label>
           <input {...register("expiry")} />
           <p style={{ color: "red" }}>{errors.expiry?.message}</p>
         </div>
 
         <div>
-          <label>CVC: </label>
+          <label>CVC:</label>
           <input {...register("cvc")} />
           <p style={{ color: "red" }}>{errors.cvc?.message}</p>
         </div>
@@ -92,7 +117,7 @@ export default function PaymentPage() {
         <h2>Información del cliente</h2>
         {Object.entries(customerLabels).map(([field, label]) => (
           <div key={field}>
-            <label>{label}: </label>
+            <label>{label}:</label>
             <input {...register(`customer.${field}`)} />
             <p style={{ color: "red" }}>{errors.customer?.[field]?.message}</p>
           </div>
@@ -100,6 +125,7 @@ export default function PaymentPage() {
 
         <button
           type="submit"
+          disabled={loading}
           style={{
             marginTop: "1rem",
             padding: "0.5rem 1rem",
@@ -107,10 +133,10 @@ export default function PaymentPage() {
             color: "white",
             border: "none",
             borderRadius: "4px",
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          Pagar
+          {loading ? "Procesando..." : "Pagar"}
         </button>
       </form>
     </div>
