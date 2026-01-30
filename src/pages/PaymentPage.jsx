@@ -12,7 +12,9 @@ export default function PaymentPage() {
   const { product, quantity } = location.state || {};
 
   const dispatch = useDispatch();
-  const { loading, success, error, paymentResponse } = useSelector(state => state.payment || {});
+  const { loading, success, error, paymentResponse } = useSelector(
+    (state) => state.payment || {}
+  );
 
   const {
     register,
@@ -64,13 +66,10 @@ export default function PaymentPage() {
   }, [dispatch]);
 
   useEffect(() => {
-  if (!loading && success && paymentResponse) {
-    const timer = setTimeout(() => {
+    if (!loading && success && paymentResponse) {
       navigate("/summary", { state: { transactionId: paymentResponse.id } });
-    }, 3500);
-    return () => clearTimeout(timer);
-  }
-}, [loading, success, paymentResponse, navigate]);
+    }
+  }, [loading, success, paymentResponse, navigate]);
 
   if (!product) return <p>No hay producto seleccionado</p>;
 
@@ -113,7 +112,18 @@ export default function PaymentPage() {
 
         <div>
           <label>Expira en (MM/YY):</label>
-          <input {...register("expiry")} />
+          <input
+            type="text"
+            placeholder="MM/YY"
+            maxLength={5}
+            {...register("expiry")}
+            onChange={(e) => {
+              let value = e.target.value.replace(/\D/g, ""); // solo números
+              if (value.length > 4) value = value.slice(0, 4); // máximo 4 dígitos
+              if (value.length > 2) value = value.slice(0, 2) + "/" + value.slice(2); // pone /
+              setValue("expiry", value); // actualiza react-hook-form
+            }}
+          />
           <p style={{ color: "red" }}>{errors.expiry?.message}</p>
         </div>
 
@@ -135,19 +145,17 @@ export default function PaymentPage() {
         <button
           type="submit"
           disabled={loading}
-          style={{
-            marginTop: "1rem",
-            padding: "0.5rem 1rem",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
+          className="payment-button"
         >
-          {loading ? "Procesando..." : "Continuar con el Pago"}
+          {loading ? (
+            <>
+              <span className="spinner"></span>Procesando...
+            </>
+          ) : (
+            "Continuar con el Pago"
+          )}
         </button>
-      </form>
-    </div>
-  );
+            </form>
+          </div>
+        );
 }

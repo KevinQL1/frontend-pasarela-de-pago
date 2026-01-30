@@ -8,8 +8,6 @@ export default function SummaryPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { transaction, loading, error } = useSelector((state) => state.transaction || {});
-  console.log("Transaction state:", transaction);
-
   const transactionId = location.state?.transactionId;
 
   useEffect(() => {
@@ -27,8 +25,9 @@ export default function SummaryPage() {
   }, [dispatch, transactionId, navigate]);
 
   const handlePay = () => {
-    alert("Pago ejecutado 😎"); // placeholder
+    navigate("/transactionStatus", { state: { transactionId } });
   };
+
 
   if (loading) return <p>Cargando resumen...</p>;
  if (error)
@@ -61,28 +60,37 @@ export default function SummaryPage() {
       </p>
 
       <h2>Cliente</h2>
-      <p>{transaction.customer?.name}</p>
-      <p>{transaction.customer?.email}</p>
-      <p>{transaction.customer?.phone}</p>
+      <p>
+        <strong>Nombre:</strong> {transaction.customer?.name}
+      </p>
+      <p>
+        <strong>Email:</strong> {transaction.customer?.email}
+      </p>
+      <p>
+        <strong>Teléfono:</strong> {transaction.customer?.phone}
+      </p>
 
       <h2>Delivery</h2>
-      <p>{transaction.customer?.address}</p>
-      <p>{transaction.customer?.city}</p>
+      <p>
+        <strong>Dirección:</strong> {transaction.customer?.address}
+      </p>
+      <p>
+        <strong>Ciudad:</strong> {transaction.customer?.city}
+      </p>
 
-      <button
+        <button
         onClick={handlePay}
-        style={{
-          marginTop: "1rem",
-          padding: "0.5rem 1rem",
-          backgroundColor: "#4CAF50",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-        }}
-      >
-        Pagar
-      </button>
+          disabled={loading}
+          className="payment-button"
+        >
+          {loading ? (
+            <>
+              <span className="spinner"></span>Procesando...
+            </>
+          ) : (
+            "Pagar Ahora"
+          )}
+        </button>
     </div>
   );
 }
