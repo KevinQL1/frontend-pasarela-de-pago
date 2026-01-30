@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { paymentSchema } from "#/schemas/paymentSchema.js";
@@ -7,11 +7,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { processPayment, resetPaymentState } from "#/features/payment/paymentSlice.js";
 
 export default function PaymentPage() {
+  const navigate = useNavigate();
   const location = useLocation();
   const { product, quantity } = location.state || {};
 
   const dispatch = useDispatch();
-  const { loading, success, error } = useSelector(state => state.payment || {});
+  const { loading, success, error, paymentResponse } = useSelector(state => state.payment || {});
 
   const {
     register,
@@ -42,7 +43,6 @@ export default function PaymentPage() {
   }, [cardNumber, setValue]);
 
   const onSubmit = (data) => {
-    // ✅ Armamos el body que espera la API
     const body = {
       paymentInfo: {
         cardNumber: data.cardNumber,
@@ -62,6 +62,15 @@ export default function PaymentPage() {
   useEffect(() => {
     return () => dispatch(resetPaymentState());
   }, [dispatch]);
+
+  useEffect(() => {
+  if (!loading && success && paymentResponse) {
+    const timer = setTimeout(() => {
+      navigate("/summary", { state: { transactionId: paymentResponse.id } });
+    }, 3500);
+    return () => clearTimeout(timer);
+  }
+}, [loading, success, paymentResponse, navigate]);
 
   if (!product) return <p>No hay producto seleccionado</p>;
 
@@ -136,7 +145,7 @@ export default function PaymentPage() {
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? "Procesando..." : "Pagar"}
+          {loading ? "Procesando..." : "Continuar con el Pago"}
         </button>
       </form>
     </div>
