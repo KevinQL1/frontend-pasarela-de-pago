@@ -40,3 +40,9 @@ dist-ssr/
 .env
 .env.*
 !.env.example
+
+# -----------------------
+# Jest / Tests / Coverage
+# -----------------------
+coverage/
+.nyc_output/

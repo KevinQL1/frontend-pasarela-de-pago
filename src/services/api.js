@@ -7,7 +7,7 @@ import axios from 'axios';
  */
 export const api = axios.create({
   // URL base del backend (API Gateway o local)
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || process.env.VITE_API_URL || 'http://localhost',
 
   // Headers comunes para todas las peticiones
   headers: {
