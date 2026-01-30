@@ -8,8 +8,6 @@ export default function SummaryPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { transaction, loading, error } = useSelector((state) => state.transaction || {});
-  console.log("Transaction state:", transaction);
-
   const transactionId = location.state?.transactionId;
 
   useEffect(() => {
@@ -27,8 +25,9 @@ export default function SummaryPage() {
   }, [dispatch, transactionId, navigate]);
 
   const handlePay = () => {
-    alert("Pago ejecutado 😎"); // placeholder
+    navigate("/transactionStatus", { state: { transactionId } });
   };
+
 
   if (loading) return <p>Cargando resumen...</p>;
  if (error)

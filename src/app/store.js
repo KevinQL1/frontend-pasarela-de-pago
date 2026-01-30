@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import productReducer from '#/features/product/productSlice.js';
 import paymentReducer from '#/features/payment/paymentSlice.js';
 import transactionReducer from '#/features/transaction/transactionSlice.js';
+import webhookReducer from '#/features/webhookStatus/webhookSlice.js';
 
 /**
  * Store global de Redux
@@ -16,5 +17,7 @@ export const store = configureStore({
     payment: paymentReducer,
     // Estado transaction -> transactionSlice
     transaction: transactionReducer,
+    // Estado webhook -> webhookSlice
+    webhook: webhookReducer, // <--- NUEVO
   },
 });
