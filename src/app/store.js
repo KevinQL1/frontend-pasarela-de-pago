@@ -18,6 +18,6 @@ export const store = configureStore({
     // Estado transaction -> transactionSlice
     transaction: transactionReducer,
     // Estado webhook -> webhookSlice
-    webhook: webhookReducer, // <--- NUEVO
+    webhook: webhookReducer,
   },
 });
